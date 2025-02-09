@@ -79,60 +79,64 @@ void processMatrixParallel(std::vector<std::vector<int>> matrix, int matrixSize,
 int main()
 
 {
+	std::vector<int> matrixSizeCounts ={1000, 10000, 30000, 50000};
 
-	auto matrix_creation_begin = std::chrono::high_resolution_clock::now();
-	std::vector<std::vector<int>> matrix;
-	int matrixSize = 20000;
-	fillMatrix(matrix, matrixSize);
-	auto matrix_creation_end = std::chrono::high_resolution_clock::now();
-	auto matrix_creation_duration = std::chrono::duration_cast<std::chrono::nanoseconds>(matrix_creation_end - matrix_creation_begin);
+	for(int i =0; i < matrixSizeCounts.size(); i++) {
+		auto matrix_creation_begin = std::chrono::high_resolution_clock::now();
+		std::vector<std::vector<int>> matrix;
+		int matrixSize = matrixSizeCounts[i];
+		fillMatrix(matrix, matrixSize);
+		auto matrix_creation_end = std::chrono::high_resolution_clock::now();
+		auto matrix_creation_duration = std::chrono::duration_cast<std::chrono::nanoseconds>(matrix_creation_end - matrix_creation_begin);
 
-	std::cout << "Matrix Creation Time: " << std::fixed << std::setprecision(9) << matrix_creation_duration.count() * 1e-9 << " seconds." << std::endl;
+		std::cout<< std::endl<< std::endl << "Matrix " << matrixSizeCounts[i]<< "x" << matrixSizeCounts[i]<< " Creation Time: " << std::fixed << std::setprecision(9) << matrix_creation_duration.count() * 1e-9 << " seconds." << std::endl;
 
-	std::vector<std::thread> threads;
-	int logicalCores = std::thread::hardware_concurrency();
-	int physicalCores = logicalCores / 2;
-	std::vector<int> threadCounts = {
-		physicalCores / 2,
-		3,
-		physicalCores,
-		logicalCores,
-		logicalCores * 2,
-		logicalCores * 4,
-		logicalCores * 8,
-		logicalCores * 16
-	};
-
-
-	std::cout << "Liniar decision" << std::endl;
-
-	auto linear_begin = std::chrono::high_resolution_clock::now();
-	processMatrixLinear(matrix, matrixSize);
-	auto linear_end = std::chrono::high_resolution_clock::now();
-	auto linear_duration = std::chrono::duration_cast<std::chrono::nanoseconds>(linear_end - linear_begin);
-
-	std::cout << "Processing Time: " << std::fixed << std::setprecision(9) << linear_duration.count() * 1e-9 << " seconds." << std::endl;
+		std::vector<std::thread> threads;
+		int logicalCores = std::thread::hardware_concurrency();
+		int physicalCores = logicalCores / 2;
+		std::vector<int> threadCounts = {
+			physicalCores / 2,
+			3,
+			physicalCores,
+			logicalCores,
+			logicalCores * 2,
+			logicalCores * 4,
+			logicalCores * 8,
+			logicalCores * 16
+		};
 
 
+		std::cout << "Liniar decision" << std::endl;
 
-	std::cout << "Parallel decisions" << std::endl;
+		auto linear_begin = std::chrono::high_resolution_clock::now();
+		processMatrixLinear(matrix, matrixSize);
+		auto linear_end = std::chrono::high_resolution_clock::now();
+		auto linear_duration = std::chrono::duration_cast<std::chrono::nanoseconds>(linear_end - linear_begin);
+
+		std::cout << "Processing Time: " << std::fixed << std::setprecision(9) << linear_duration.count() * 1e-9 << " seconds." << std::endl;
 
 
-	for(int i = 0; i < threadCounts.size(); i++){
+
+		std::cout << "Parallel decisions" << std::endl;
 
 
-		auto parllel_bigin = std::chrono::high_resolution_clock::now();
-		processMatrixParallel(matrix, matrixSize, threads, threadCounts[i]);
-		auto parallel_end = std::chrono::high_resolution_clock::now();
-		auto parallel_duration = std::chrono::duration_cast<std::chrono::nanoseconds>(parallel_end - parllel_bigin);
+		for(int i = 0; i < threadCounts.size(); i++){
 
-		std::cout << "Threads Number: " << threadCounts[i] << " Processing Time: " << std::fixed << std::setprecision(9) << parallel_duration.count() * 1e-9 << " seconds." << std::endl;
 
-		for (auto& thread : threads) {
-			thread.join();
+			auto parllel_bigin = std::chrono::high_resolution_clock::now();
+			processMatrixParallel(matrix, matrixSize, threads, threadCounts[i]);
+			auto parallel_end = std::chrono::high_resolution_clock::now();
+			auto parallel_duration = std::chrono::duration_cast<std::chrono::nanoseconds>(parallel_end - parllel_bigin);
+
+			std::cout << "Threads Number: " << threadCounts[i] << " Processing Time: " << std::fixed << std::setprecision(9) << parallel_duration.count() * 1e-9 << " seconds." << std::endl;
+
+			for (auto& thread : threads) {
+				thread.join();
+			}
+			threads.clear();
+
 		}
-		threads.clear();
-
 	}
+
 	return 0;
 }
