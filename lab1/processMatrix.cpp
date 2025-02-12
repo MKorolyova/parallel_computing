@@ -20,7 +20,7 @@ void printMatrix(std::vector<std::vector<int>>& matrix, int matrixSize) {
 
 	std::cout << "\n\n";
 	for (int i = 0; i < matrixSize; i++) {
-		for (int j = 0; j <matrixSize; j++) {
+		for (int j = 0; j < matrixSize; j++) {
 			std::cout << matrix[i][j] << "\t";
 		}
 		std::cout << "\n";
@@ -61,7 +61,7 @@ void processMatrixParallel(std::vector<std::vector<int>> matrix, int matrixSize,
 			for (int i = startRow; i < endRow; i++) {
 				processRow(matrix[i], i, matrixSize);
 			}
-		}));
+			}));
 	}
 
 	for (auto& thread : threads) {
@@ -72,7 +72,7 @@ void processMatrixParallel(std::vector<std::vector<int>> matrix, int matrixSize,
 int main()
 
 {
-	std::vector<int> matrixSizeCounts = {1000, 10000, 30000, 50000};
+	std::vector<int> matrixSizeCounts = { 1000, 10000, 30000 };
 	for (int i = 0; i < matrixSizeCounts.size(); i++) {
 
 		auto matrix_creation_begin = std::chrono::high_resolution_clock::now();
@@ -82,7 +82,7 @@ int main()
 		auto matrix_creation_end = std::chrono::high_resolution_clock::now();
 		auto matrix_creation_duration = std::chrono::duration_cast<std::chrono::nanoseconds>(matrix_creation_end - matrix_creation_begin);
 
-		std::cout<< std::endl << std::endl << "Matrix " << matrixSize << "x" << matrixSize << " Creation Time: " << std::fixed << std::setprecision(9) << matrix_creation_duration.count() * 1e-9 << " seconds." << std::endl;
+		std::cout << std::endl << std::endl << "Matrix " << matrixSize << "x" << matrixSize << " Creation Time: " << std::fixed << std::setprecision(9) << matrix_creation_duration.count() * 1e-9 << " seconds." << std::endl;
 
 		int logicalCores = std::thread::hardware_concurrency();
 		int physicalCores = logicalCores / 2;
@@ -93,7 +93,8 @@ int main()
 			logicalCores * 2,
 			logicalCores * 4,
 			logicalCores * 8,
-			logicalCores * 16
+			logicalCores * 16,
+			10000,
 		};
 
 		std::cout << "Liniar decision" << std::endl;
@@ -107,7 +108,7 @@ int main()
 
 
 		std::cout << "Parallel decisions" << std::endl;
-		for(int i = 0; i < threadCounts.size(); i++){
+		for (int i = 0; i < threadCounts.size(); i++) {
 
 			auto parllel_begin = std::chrono::high_resolution_clock::now();
 			processMatrixParallel(matrix, matrixSize, threadCounts[i]);
@@ -119,6 +120,6 @@ int main()
 		}
 	}
 
-
+	system("pause");
 	return 0;
 }
