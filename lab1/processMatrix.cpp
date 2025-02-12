@@ -5,7 +5,6 @@
 #include <algorithm> // For std::swap
 #include <iomanip>  // For std::fixed and std::setprecision
 
-
 void fillMatrix(std::vector<std::vector<int>>& matrix, int matrixSize) {
 
 	matrix.resize(matrixSize, std::vector<int>(matrixSize));
@@ -29,59 +28,53 @@ void printMatrix(std::vector<std::vector<int>>& matrix, int matrixSize) {
 	std::cout << "\n\n";
 }
 
+void processRow(std::vector<int>& row, int currentRow, int matrixSize) {
+	for (int j = 0; j < matrixSize; j++) {
+		if (row[currentRow] < row[j]) {
+			std::swap(row[currentRow], row[j]);
+		}
+	}
+}
 
 void processMatrixLinear(std::vector<std::vector<int>> matrix, int matrixSize) {
 
 	for (int i = 0; i < matrixSize; i++) {
-		for (int j = 0; j < matrixSize; j++) {
-			if (matrix[i][i] < matrix[i][j]) {
-				std::swap(matrix[i][i], matrix[i][j]);
-			}
-
-		}
+		processRow(matrix[i], i, matrixSize);
 	}
 }
 
-void processRow(std::vector<std::vector<int>> matrix, int matrixSize, int startRow, int endRow) {
+void processMatrixParallel(std::vector<std::vector<int>> matrix, int matrixSize, int threadsNumber) {
+	int rowsNumberPerThread = matrixSize / threadsNumber;
+	std::vector<std::thread> threads;
 
-	for (int i = startRow; i < endRow; i++) {
-		for (int j = 0; j < matrixSize; j++) {
-			if (matrix[i][i] < matrix[i][j]) {
-				std::swap(matrix[i][i], matrix[i][j]);
-			}
-
-		}
-	}
-}
-
-void processMatrixParallel(std::vector<std::vector<int>> matrix, int matrixSize, std::vector<std::thread>& threads, int threadsNumber) {
-
-	int rowsNumberForthread = matrixSize / threadsNumber;
-
-	if (rowsNumberForthread == 0) {
-		std::cout << "Matrix is too small for parallel processing with this number of threads, so we will use " << matrixSize << " threads." << std::endl;
-		rowsNumberForthread = 1;
+	if (rowsNumberPerThread == 0) {
+		std::cout << "Matrix is too small for parallel processing with this number of threads, using " << matrixSize << " threads.\n";
+		rowsNumberPerThread = 1;
+		threadsNumber = matrixSize;
 	}
 
 	for (int i = 0; i < threadsNumber; i++) {
-		int startRow = i * rowsNumberForthread;
-		int endRow = (i == threadsNumber - 1) ? (matrixSize - 1) : (startRow + rowsNumberForthread - 1);
+		int startRow = i * rowsNumberPerThread;
+		int endRow = (i == threadsNumber - 1) ? matrixSize : (startRow + rowsNumberPerThread);
 
-		threads.push_back(std::thread(processRow, matrix, matrixSize, startRow, endRow)); //emplace_back
-
-		//std::cout << "Thread " << i + 1 << ": processing rows " << startRow << " to " << endRow << std::endl;
-
+		threads.push_back(std::thread([startRow, endRow, &matrix, matrixSize]() {
+			for (int i = startRow; i < endRow; i++) {
+				processRow(matrix[i], i, matrixSize);
+			}
+		}));
 	}
 
+	for (auto& thread : threads) {
+		thread.join();
+	}
 }
-
 
 int main()
 
 {
-	std::vector<int> matrixSizeCounts ={1000, 10000, 30000, 50000};
+	std::vector<int> matrixSizeCounts = {1000, 10000, 30000, 50000};
+	for (int i = 0; i < matrixSizeCounts.size(); i++) {
 
-	for(int i =0; i < matrixSizeCounts.size(); i++) {
 		auto matrix_creation_begin = std::chrono::high_resolution_clock::now();
 		std::vector<std::vector<int>> matrix;
 		int matrixSize = matrixSizeCounts[i];
@@ -89,14 +82,12 @@ int main()
 		auto matrix_creation_end = std::chrono::high_resolution_clock::now();
 		auto matrix_creation_duration = std::chrono::duration_cast<std::chrono::nanoseconds>(matrix_creation_end - matrix_creation_begin);
 
-		std::cout<< std::endl<< std::endl << "Matrix " << matrixSizeCounts[i]<< "x" << matrixSizeCounts[i]<< " Creation Time: " << std::fixed << std::setprecision(9) << matrix_creation_duration.count() * 1e-9 << " seconds." << std::endl;
+		std::cout<< std::endl << std::endl << "Matrix " << matrixSize << "x" << matrixSize << " Creation Time: " << std::fixed << std::setprecision(9) << matrix_creation_duration.count() * 1e-9 << " seconds." << std::endl;
 
-		std::vector<std::thread> threads;
 		int logicalCores = std::thread::hardware_concurrency();
 		int physicalCores = logicalCores / 2;
 		std::vector<int> threadCounts = {
 			physicalCores / 2,
-			3,
 			physicalCores,
 			logicalCores,
 			logicalCores * 2,
@@ -104,7 +95,6 @@ int main()
 			logicalCores * 8,
 			logicalCores * 16
 		};
-
 
 		std::cout << "Liniar decision" << std::endl;
 
@@ -116,27 +106,19 @@ int main()
 		std::cout << "Processing Time: " << std::fixed << std::setprecision(9) << linear_duration.count() * 1e-9 << " seconds." << std::endl;
 
 
-
 		std::cout << "Parallel decisions" << std::endl;
-
-
 		for(int i = 0; i < threadCounts.size(); i++){
 
-
-			auto parllel_bigin = std::chrono::high_resolution_clock::now();
-			processMatrixParallel(matrix, matrixSize, threads, threadCounts[i]);
+			auto parllel_begin = std::chrono::high_resolution_clock::now();
+			processMatrixParallel(matrix, matrixSize, threadCounts[i]);
 			auto parallel_end = std::chrono::high_resolution_clock::now();
-			auto parallel_duration = std::chrono::duration_cast<std::chrono::nanoseconds>(parallel_end - parllel_bigin);
+			auto parallel_duration = std::chrono::duration_cast<std::chrono::nanoseconds>(parallel_end - parllel_begin);
 
 			std::cout << "Threads Number: " << threadCounts[i] << " Processing Time: " << std::fixed << std::setprecision(9) << parallel_duration.count() * 1e-9 << " seconds." << std::endl;
 
-			for (auto& thread : threads) {
-				thread.join();
-			}
-			threads.clear();
-
 		}
 	}
+
 
 	return 0;
 }
