@@ -72,6 +72,9 @@ void processMatrixParallel(std::vector<std::vector<int>> matrix, int matrixSize,
 int main()
 
 {
+	unsigned int n = std::thread::hardware_concurrency();
+	std::cout << n << " concurrent threads are supported.\n";
+
 	std::vector<int> matrixSizeCounts = { 1000, 10000, 30000 };
 	for (int i = 0; i < matrixSizeCounts.size(); i++) {
 
