@@ -3,4 +3,9 @@
 /lab1/cmake-build-release
 /lab1/CMakeLists.txt
 
+/lab2/.idea
+/lab2/cmake-build-debug
+/lab2/cmake-build-release
+/lab2/CMakeLists.txt
+
 /doc
