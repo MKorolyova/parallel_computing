@@ -5,6 +5,7 @@
 #include <atomic>
 #include <mutex>
 #include <cstdlib>
+#include <iomanip>
 
 void fillArray(std::vector<int>& array, int arraySize) {
     array.resize(arraySize);
@@ -73,9 +74,15 @@ void processArrayWithMutex(const std::vector<int>& data, long long& sum, int& mo
     modTwo = sum % 2;
 }
 
-void processChunkWithCAS(const std::vector<int>& data, std::atomic<long long> &sum , std::atomic<int> &currentIndex, const int chunk_size ) {
+void processChunkWithCAS(const std::vector<int>& data, std::atomic<long long> &sum, std::atomic<int> &currentIndex, const int chunk_size) {
+    int startIndex;
+    int desired;
 
-    int startIndex = currentIndex.fetch_add(chunk_size);
+    do {
+        startIndex = currentIndex.load();
+        desired = startIndex + chunk_size;
+    } while (!currentIndex.compare_exchange_weak(startIndex, desired));
+
     int endIndex = std::min((startIndex + chunk_size), static_cast<int>(data.size()));
 
     long long localSum = 0;
@@ -85,8 +92,13 @@ void processChunkWithCAS(const std::vector<int>& data, std::atomic<long long> &s
         }
     }
 
-    sum.fetch_add(localSum);
+    long long expected = sum.load();
+    long long newSum;
+    do {
+        newSum = expected + localSum;
+    } while (!sum.compare_exchange_weak(expected, newSum));
 }
+
 
 void processArrayWithCAS(const std::vector<int> &data, std::atomic<long long>&sum, int& modTwo, int maxThreads) {
     int chunk_size = data.size() / maxThreads;
@@ -110,7 +122,7 @@ void processArrayWithCAS(const std::vector<int> &data, std::atomic<long long>&su
 
 int main() {
 
-    std::vector<int> arraySizeCounts = { 10000, 1000000, 100000000, 1000000000};
+    std::vector<int> arraySizeCounts = { 10000, 1000000, 1000000000, 2000000000};
     std::vector<int> threadCounts = {2, 4, 8, 16, 32, 64, 128};
 
     for (int i = 0; i < arraySizeCounts.size(); i++) {
