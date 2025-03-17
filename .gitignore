@@ -8,4 +8,10 @@
 /lab2/cmake-build-release
 /lab2/CMakeLists.txt
 
+/lab3/.idea
+/lab3/cmake-build-debug
+/lab3/cmake-build-release
+/lab3/CMakeLists.txt
+
+
 /doc
