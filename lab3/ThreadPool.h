@@ -18,8 +18,8 @@ public:
     ThreadPool(const int threadsNumber = std::thread::hardware_concurrency());
     ~ThreadPool();
 
-    void startThreadPool(const bool f);
-    void stopThreadPool(const bool t);
+    void startThreadPool();
+    void stopThreadPool();
     void endThreadPool();
 
 

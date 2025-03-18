@@ -8,18 +8,18 @@ ThreadPool::ThreadPool(const int threadsNumber){ //Number of concurrent threads 
     }
 }
 
-void ThreadPool::startThreadPool(const bool f) {
+void ThreadPool::startThreadPool() {
     {
         std::unique_lock<std::mutex> lock(queueMutex);
-        pause = f;
+        pause = false;
     }
     cv.notify_all();
 }
 
-void ThreadPool::stopThreadPool(const bool t) {
+void ThreadPool::stopThreadPool() {
     {
         std::unique_lock<std::mutex> lock(queueMutex);
-        pause = t;
+        pause = true;
     }
 }
 
