@@ -129,6 +129,10 @@ def main():
 
             elif (command == "Q"):
                 print("Exiting...")
+                msg = Message()
+                msg.setCommand(command)
+                encoded = msg.encode()
+                client_socket.sendall(encoded)
                 break
             else:
                 msg = Message()

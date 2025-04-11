@@ -144,6 +144,12 @@ int main() {
 			break;
 			}
 			case 'Q': {
+				char requestBuffer[1] = {command};
+				int sbyteCount = send(clientSocket, requestBuffer, 1, 0);
+				if (sbyteCount == SOCKET_ERROR) {
+					std::cout << "Server send error: " << WSAGetLastError() << std::endl;
+					goto end_loop;
+				}
 				std::cout << "exiting....." << std::endl;
 				goto end_loop;
 			}
@@ -166,6 +172,7 @@ int main() {
 		}
     } end_loop:;
 
+	Sleep(10);
     closesocket(clientSocket);
     WSACleanup();
 
