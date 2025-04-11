@@ -13,5 +13,13 @@
 /lab3/cmake-build-release
 /lab3/CMakeLists.txt
 
+/lab4/client/.idea
+/lab4/client/cmake-build-debug
+/lab4/client/cmake-build-release
+/lab4/client/CMakeLists.txt
 
+/lab4/server/.idea
+/lab4/server/cmake-build-debug
+/lab4/server/cmake-build-release
+/lab4/server/CMakeLists.txt
 /doc
