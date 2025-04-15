@@ -22,4 +22,9 @@
 /lab4/server/cmake-build-debug
 /lab4/server/cmake-build-release
 /lab4/server/CMakeLists.txt
+
+/lab5/httpServer/cmake-build-debug
+/lab5/httpServer/cmake-build-release
+/lab5/httpServer/CMakeLists.txt
+/lab5/httpServer/.idea
 /doc
