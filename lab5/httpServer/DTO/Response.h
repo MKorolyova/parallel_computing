@@ -3,7 +3,7 @@
 
 class Response {
     private:
-        std::string version = "HTTP/1.1";
+        std::string version = "HTTP/1.1 ";
         std::string contentLength;
         std::string contentType;
         std::string status;
